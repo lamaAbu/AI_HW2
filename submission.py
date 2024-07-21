@@ -5,7 +5,23 @@ import random
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
-    pass
+    cur_robot = env.get_robot(robot_id)
+    credit = cur_robot.credit
+    if env.robot_is_occupied(robot_id):
+        # the robot is carrying a package
+        destination = cur_robot.package.destination
+        return manhattan_distance(destination,cur_robot.position)/(2*credit)
+    
+    #o.w
+    possible_packages = [package for package in env.packages if package.on_board == True]
+    if possible_packages.__len__() > 0:
+        best_package = possible_packages[0] #not sure how best_packag should be calculated
+        return manhattan_distance(best_package.position,cur_robot.position)/(credit)
+
+    #else: can we get here?
+
+
+
 
 class AgentGreedyImproved(AgentGreedy):
     def heuristic(self, env: WarehouseEnv, robot_id: int):
