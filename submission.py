@@ -14,11 +14,16 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     
     #o.w
     possible_packages = [package for package in env.packages if package.on_board == True]
-    if possible_packages.__len__() > 0:
-        best_package = possible_packages[0] #not sure how best_packag should be calculated
-        return manhattan_distance(best_package.position,cur_robot.position)/(credit)
+    best_package = possible_packages[0]
 
-    #else: can we get here?
+    #if possible_packages.__len__() == 1:
+    
+    if possible_packages.__len__() == 2:
+        if(manhattan_distance(cur_robot.position, best_package > manhattan_distance(cur_robot,possible_packages[1]))):
+            best_package = possible_packages[1]
+
+    return manhattan_distance(best_package.position,cur_robot.position)/(credit)
+
 
 
 
