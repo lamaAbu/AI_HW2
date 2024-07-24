@@ -20,10 +20,19 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     #     return 1000000
     
     #elif cur_robot.package == None and 
+    charges = [c for c in env.charge_stations]
+    best_charge = charges[0]
+    if(manhattan_distance(cur_robot.position, best_charge.position) > manhattan_distance(cur_robot.position,charges[1].position)):
+        best_charge = charges[1]
+
+    if cur_robot.package is not None and credit - manhattan_distance(best_charge.position ,cur_robot.position) - manhattan_distance(cur_robot.package.destination.position ,cur_robot.position) <= env.num_steps:
+        to_return = 1000 + (10000*(credit + 100) + 0.01/(1 + manhattan_distance(best_charge.position,cur_robot.position)))
+        return to_return
+
     if env.robot_is_occupied(robot_id):
         # the robot is carrying a package
         destination = cur_robot.package.destination
-        to_return = 4* (100*credit + battery -1)/(10*(1 + manhattan_distance(destination,cur_robot.position)))
+        to_return = 100 + (10000*(credit + 100) + 0.01/(1 + manhattan_distance(destination,cur_robot.position)))
         print("aaaaaaaaaaaaaaaaaaaaaaa: ", to_return)
         return  to_return
     
@@ -41,7 +50,7 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
         if packages_on_board.__len__() == 2:
             if(manhattan_distance(cur_robot.position, best_package.position) > manhattan_distance(cur_robot.position,packages_on_board[1].position)):
                 best_package = packages_on_board[1]
-        to_return = (100*credit + battery -1)/(10*(1 + manhattan_distance(best_package.position,cur_robot.position)))
+        to_return = (10000*(credit + 100) + 0.01/(1 + manhattan_distance(best_package.position,cur_robot.position)))
         print("bbbbbbbbbbbbbbbbbbbbbb: ", to_return)
         return to_return
 
