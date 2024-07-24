@@ -10,19 +10,24 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
     if env.robot_is_occupied(robot_id):
         # the robot is carrying a package
         destination = cur_robot.package.destination
-        return manhattan_distance(destination,cur_robot.position)/(2*credit)
+        return 2*manhattan_distance(destination,cur_robot.position)-2*credit
     
     #o.w
-    possible_packages = [package for package in env.packages if package.on_board == True]
-    best_package = possible_packages[0]
+    else:
+        #the robot is carrying the package
+        packages_on_board = [package for package in env.packages if package.on_board == True]
+        if packages_on_board.__len__() == 0:
+            #not possible I guess
+            return
+        
+        #if packages_on_board.__len__() == 1:
+        best_package = packages_on_board[0]
+        
+        if packages_on_board.__len__() == 2:
+            if(manhattan_distance(cur_robot.position, best_package.position) > manhattan_distance(cur_robot.position,packages_on_board[1].position)):
+                best_package = packages_on_board[1]
 
-    #if possible_packages.__len__() == 1:
-    
-    if possible_packages.__len__() == 2:
-        if(manhattan_distance(cur_robot.position, best_package > manhattan_distance(cur_robot,possible_packages[1]))):
-            best_package = possible_packages[1]
-
-    return manhattan_distance(best_package.position,cur_robot.position)/(credit)
+        return 2*manhattan_distance(best_package.position,cur_robot.position)-credit
 
 
 
