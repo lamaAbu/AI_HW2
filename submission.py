@@ -7,10 +7,25 @@ import random
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
     cur_robot = env.get_robot(robot_id)
     credit = cur_robot.credit
+    battery = cur_robot.battery
+    package = env.get_package_in(cur_robot.position)
+    # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:", package )
+    
+    # if cur_robot.package is not None and cur_robot.position == cur_robot.package.destination: #the robot has package and is on a distitantion
+        
+    #     return 1000000
+    
+    # elif cur_robot.package is None and package is not None and package.on_board: #the robot doesnt have a package and is on a package
+    #     print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+    #     return 1000000
+    
+    #elif cur_robot.package == None and 
     if env.robot_is_occupied(robot_id):
         # the robot is carrying a package
         destination = cur_robot.package.destination
-        return 2*manhattan_distance(destination,cur_robot.position)-2*credit
+        to_return = 4* (100*credit + battery -1)/(10*(1 + manhattan_distance(destination,cur_robot.position)))
+        print("aaaaaaaaaaaaaaaaaaaaaaa: ", to_return)
+        return  to_return
     
     #o.w
     else:
@@ -26,8 +41,9 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
         if packages_on_board.__len__() == 2:
             if(manhattan_distance(cur_robot.position, best_package.position) > manhattan_distance(cur_robot.position,packages_on_board[1].position)):
                 best_package = packages_on_board[1]
-
-        return 2*manhattan_distance(best_package.position,cur_robot.position)-credit
+        to_return = (100*credit + battery -1)/(10*(1 + manhattan_distance(best_package.position,cur_robot.position)))
+        print("bbbbbbbbbbbbbbbbbbbbbb: ", to_return)
+        return to_return
 
 
 
@@ -78,3 +94,4 @@ class AgentHardCoded(Agent):
         operators, _ = self.successors(env, robot_id)
 
         return random.choice(operators)
+    
