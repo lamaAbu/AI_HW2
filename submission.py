@@ -2,6 +2,11 @@ from Agent import Agent, AgentGreedy
 from WarehouseEnv import WarehouseEnv, manhattan_distance
 import random
 
+#added by Lama
+from WarehouseEnv import board_size
+import time
+
+
 
 # TODO: section a : 3
 def smart_heuristic(env: WarehouseEnv, robot_id: int):
@@ -39,10 +44,74 @@ class AgentGreedyImproved(AgentGreedy):
         return smart_heuristic(env, robot_id)
 
 
+
+
+def max_succ(children_heuristics):
+    max_val = float('-inf')
+    for val in children_heuristics:
+        if val > max_val:
+            max_val = val
+    return max_val
+
+def min_succ(children_heuristics):
+    min_val = float('inf')
+    for val in children_heuristics:
+        if val < min_val:
+            min_val = val
+    return min_val
+
+def time_out(start_t, limit_t):
+    cur_t = time.time()
+    if start_t + limit_t  >= cur_t:
+        #time is not out yet
+        return False
+    return True
+
 class AgentMinimax(Agent):
+
+    def minimax(self, env: WarehouseEnv, children_heuristics, id, cur_depth):
+    #from lecture
+        #if the state is a terminal state: return the state’s utility
+        if env.done() or cur_depth <= 0: #or check time limit and depth?
+            return smart_heuristic(env, id)
+        
+        #if the next agent is MAX: return max-value(state)
+        if id == 0:
+            return max_succ(children_heuristics)
+        
+        #if the next agent is MIN: return min-value(state)
+        return min_succ(children_heuristics)
+    
+
     # TODO: section b : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        start_time = time.time()
+        operators = env.get_legal_operators(agent_id)
+        children = [env.clone() for _ in operators]
+        for child, op in zip(children, operators):
+            child.apply_operator(agent_id, op)
+        children_heuristics = [self.heuristic(child, agent_id) for child in children]
+
+        best_succ = max(children_heuristics)
+        #index_selected = children_heuristics.index(best_succ)
+        possible_moves = [i for i, c in enumerate(children_heuristics) if c == best_succ]
+
+        depth = 2*board_size
+        index_selected = -1
+        #to_apply = None #just initializing
+        #while True:
+        #    if time_out(start_time, time_limit):
+        #        raise RuntimeError
+        #    if depth < 0 :
+        #        break
+        #    to_apply = self.minimax(env, children_heuristics, agent_id,depth)
+        #    depth = depth - 3 #but why?
+        #    index_selected = children_heuristics.index(to_apply)
+        #    
+        #if index_selected == -1:
+        #    return None
+        
+        return operators[random.choice(possible_moves)]
 
 
 class AgentAlphaBeta(Agent):
