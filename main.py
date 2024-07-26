@@ -51,7 +51,7 @@ def run_agents():
             env.pygame_print()
 
         for _ in range(args.count_steps):
-            time.sleep(0.7)
+            #time.sleep(0.5)
             for i, agent_name in enumerate(agent_names):
                 agent = agents[agent_name]
                 start = time.time()

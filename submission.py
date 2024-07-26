@@ -45,73 +45,85 @@ class AgentGreedyImproved(AgentGreedy):
 
 
 
+def minimax_heuristic(env: WarehouseEnv, agent_id):
+    return
 
-def max_succ(children_heuristics):
-    max_val = float('-inf')
-    for val in children_heuristics:
-        if val > max_val:
-            max_val = val
-    return max_val
 
-def min_succ(children_heuristics):
-    min_val = float('inf')
-    for val in children_heuristics:
-        if val < min_val:
-            min_val = val
-    return min_val
+def time_out_ERROR(start_t, limit_t):
+    cur_t = time.time()
+    if start_t + limit_t  < cur_t:
+        #time limit reached
+        raise RuntimeError
 
 def time_out(start_t, limit_t):
     cur_t = time.time()
     if start_t + limit_t  >= cur_t:
-        #time is not out yet
+        #time is not out yet 
         return False
-    return True
+    return True    
 
 class AgentMinimax(Agent):
+    def heuristic(self, env: WarehouseEnv, robot_id: int):
+        return minimax_heuristic(env, robot_id)
 
-    def minimax(self, env: WarehouseEnv, children_heuristics, id, cur_depth):
-    #from lecture
+    def max_succ(self, env: WarehouseEnv, me_robot, cur_robot, cur_depth, limit_time, start_time):
+        max_val = float('-inf')
+        operators = env.get_legal_operators(cur_robot)
+        children = [env.clone() for _ in operators]
+        for child, op in zip(children, operators):
+            child.apply_operator(cur_robot, op)
+
+        for _, c in zip(operators, children):
+            tmp = self.minimax(env, me_robot, cur_robot, cur_depth - 1, limit_time, start_time)
+            if tmp > max_val:
+                max_val = tmp
+        return max_val
+
+    def min_succ(self, env: WarehouseEnv, me_robot, cur_robot, cur_depth, limit_time, start_time):
+        min_val = float('inf')
+        operators = env.get_legal_operators(cur_robot)
+        children = [env.clone() for _ in operators]
+        for child, op in zip(children, operators):
+            child.apply_operator(cur_robot, op)
+
+        for _, c in zip(operators, children):
+            tmp = self.minimax(env, me_robot, cur_robot, cur_depth - 1, limit_time, start_time)
+            if tmp < min_val:
+                min_val = tmp
+        return min_val
+    
+    def minimax(self, env: WarehouseEnv, me_robot, cur_robot, cur_depth, limit_time, start_time):
+        time_out_ERROR(start_time, limit_time)
+        #from lecture
         #if the state is a terminal state: return the state’s utility
         if env.done() or cur_depth <= 0: #or check time limit and depth?
-            return smart_heuristic(env, id)
+            return self.heuristic(env, me_robot)
         
         #if the next agent is MAX: return max-value(state)
-        if id == 0:
-            return max_succ(children_heuristics)
+        if me_robot == cur_robot:
+            return self.max_succ(env, me_robot, cur_robot, cur_depth, limit_time, start_time)
         
         #if the next agent is MIN: return min-value(state)
-        return min_succ(children_heuristics)
+        return self.min_succ(env, me_robot, cur_robot, cur_depth, limit_time, start_time)
     
 
     # TODO: section b : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         start_time = time.time()
+        robot_enemy = 1 - agent_id
+
         operators = env.get_legal_operators(agent_id)
         children = [env.clone() for _ in operators]
         for child, op in zip(children, operators):
             child.apply_operator(agent_id, op)
-        children_heuristics = [self.heuristic(child, agent_id) for child in children]
 
-        best_succ = max(children_heuristics)
-        #index_selected = children_heuristics.index(best_succ)
-        possible_moves = [i for i, c in enumerate(children_heuristics) if c == best_succ]
+        children_heuristics = [self.minimax(child, agent_id, robot_enemy, 2*board_size, time_limit, start_time) for child in children]
+        max_heuristic = max(children_heuristics)
+        index_selected = children_heuristics.index(max_heuristic)
+        return operators[index_selected]
 
-        depth = 2*board_size
-        index_selected = -1
-        #to_apply = None #just initializing
-        #while True:
-        #    if time_out(start_time, time_limit):
-        #        raise RuntimeError
-        #    if depth < 0 :
-        #        break
-        #    to_apply = self.minimax(env, children_heuristics, agent_id,depth)
-        #    depth = depth - 3 #but why?
-        #    index_selected = children_heuristics.index(to_apply)
-        #    
-        #if index_selected == -1:
-        #    return None
         
-        return operators[random.choice(possible_moves)]
+        
 
 
 class AgentAlphaBeta(Agent):
