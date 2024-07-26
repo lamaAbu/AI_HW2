@@ -45,8 +45,20 @@ class AgentGreedyImproved(AgentGreedy):
 
 
 
-def minimax_heuristic(env: WarehouseEnv, agent_id):
-    return
+def heuristic_for_minimax(env: WarehouseEnv, agent_id):
+    if not env.done():
+        return smart_heuristic(env, agent_id)
+    
+    Lama = env.get_robot(agent_id)
+    Jad = env.get_robot(1 - agent_id)
+
+    if Lama.credits < Jad.credits:
+        return float('-inf')
+    
+    elif Lama.credits > Jad.credits:
+        return float('inf')
+    
+    return 0 #?
 
 
 def time_out_ERROR(start_t, limit_t):
@@ -63,8 +75,6 @@ def time_out(start_t, limit_t):
     return True    
 
 class AgentMinimax(Agent):
-    def heuristic(self, env: WarehouseEnv, robot_id: int):
-        return minimax_heuristic(env, robot_id)
 
     def max_succ(self, env: WarehouseEnv, me_robot, cur_robot, cur_depth, limit_time, start_time):
         max_val = float('-inf')
@@ -97,7 +107,7 @@ class AgentMinimax(Agent):
         #from lecture
         #if the state is a terminal state: return the state’s utility
         if env.done() or cur_depth <= 0: #or check time limit and depth?
-            return self.heuristic(env, me_robot)
+            return heuristic_for_minimax(env, me_robot)
         
         #if the next agent is MAX: return max-value(state)
         if me_robot == cur_robot:
