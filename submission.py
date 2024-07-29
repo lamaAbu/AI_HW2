@@ -83,8 +83,8 @@ class AgentMinimax(Agent):
         for child, op in zip(children, operators):
             child.apply_operator(cur_robot, op)
 
-        for _, c in zip(operators, children):
-            tmp = self.minimax(c, me_robot, cur_robot, cur_depth, limit_time, start_time)
+        for _, child in zip(operators, children):
+            tmp = self.minimax(child, me_robot, cur_robot, cur_depth, limit_time, start_time)
             if tmp > max_val:
                 max_val = tmp
         return max_val
@@ -96,8 +96,8 @@ class AgentMinimax(Agent):
         for child, op in zip(children, operators):
             child.apply_operator(cur_robot, op)
 
-        for _, c in zip(operators, children):
-            tmp = self.minimax(c, me_robot, cur_robot, cur_depth, limit_time, start_time)
+        for _, child in zip(operators, children):
+            tmp = self.minimax(child, me_robot, cur_robot, cur_depth, limit_time, start_time)
             if tmp < min_val:
                 min_val = tmp
         return min_val
@@ -130,7 +130,7 @@ class AgentMinimax(Agent):
                     child.apply_operator(agent_id, op)
 
                 children_heuristics = [self.minimax(child, agent_id, robot_enemy, depth, time_limit, start_time) for child in children]
-                depth = depth + 1
+                depth = depth + 3
                 max_heuristic = max(children_heuristics)
                 index_selected = children_heuristics.index(max_heuristic)
             except RuntimeError:
