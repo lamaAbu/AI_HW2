@@ -52,10 +52,10 @@ def heuristic_for_minimax(env: WarehouseEnv, agent_id):
     Lama = env.get_robot(agent_id)
     Jad = env.get_robot(1 - agent_id)
 
-    if Lama.credits < Jad.credits:
+    if Lama.credit < Jad.credit:
         return float('-inf')
     
-    elif Lama.credits > Jad.credits:
+    elif Lama.credit > Jad.credit:
         return float('inf')
     
     return 0 #?
@@ -84,7 +84,7 @@ class AgentMinimax(Agent):
             child.apply_operator(cur_robot, op)
 
         for _, c in zip(operators, children):
-            tmp = self.minimax(env, me_robot, cur_robot, cur_depth - 1, limit_time, start_time)
+            tmp = self.minimax(c, me_robot, cur_robot, cur_depth, limit_time, start_time)
             if tmp > max_val:
                 max_val = tmp
         return max_val
@@ -97,7 +97,7 @@ class AgentMinimax(Agent):
             child.apply_operator(cur_robot, op)
 
         for _, c in zip(operators, children):
-            tmp = self.minimax(env, me_robot, cur_robot, cur_depth - 1, limit_time, start_time)
+            tmp = self.minimax(c, me_robot, cur_robot, cur_depth, limit_time, start_time)
             if tmp < min_val:
                 min_val = tmp
         return min_val
@@ -111,26 +111,30 @@ class AgentMinimax(Agent):
         
         #if the next agent is MAX: return max-value(state)
         if me_robot == cur_robot:
-            return self.max_succ(env, me_robot, cur_robot, cur_depth, limit_time, start_time)
+            return self.max_succ(env, me_robot, cur_robot, cur_depth-1, limit_time, start_time)
         
         #if the next agent is MIN: return min-value(state)
-        return self.min_succ(env, me_robot, cur_robot, cur_depth, limit_time, start_time)
+        return self.min_succ(env, me_robot, cur_robot, cur_depth-1, limit_time, start_time)
     
 
     # TODO: section b : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
         start_time = time.time()
         robot_enemy = 1 - agent_id
+        depth = 0 #trying
+        while True:
+            try:
+                operators = env.get_legal_operators(agent_id)
+                children = [env.clone() for _ in operators]
+                for child, op in zip(children, operators):
+                    child.apply_operator(agent_id, op)
 
-        operators = env.get_legal_operators(agent_id)
-        children = [env.clone() for _ in operators]
-        for child, op in zip(children, operators):
-            child.apply_operator(agent_id, op)
-
-        children_heuristics = [self.minimax(child, agent_id, robot_enemy, 2*board_size, time_limit, start_time) for child in children]
-        max_heuristic = max(children_heuristics)
-        index_selected = children_heuristics.index(max_heuristic)
-        return operators[index_selected]
+                children_heuristics = [self.minimax(child, agent_id, robot_enemy, depth, time_limit, start_time) for child in children]
+                depth = depth + 1
+                max_heuristic = max(children_heuristics)
+                index_selected = children_heuristics.index(max_heuristic)
+            except RuntimeError:
+                return operators[index_selected]
 
         
         
