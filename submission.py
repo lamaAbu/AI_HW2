@@ -243,8 +243,92 @@ class AgentAlphaBeta(Agent):
 
 class AgentExpectimax(Agent):
     # TODO: section d : 1
+    def __init__(self):
+        super().__init__()
+        self.op = None
+
+    
+    def minimax(self, env: WarehouseEnv, me_robot, cur_robot, cur_depth, limit_time, start_time):
+        time_out_ERROR(start_time, limit_time)
+        #from lecture
+        #if the state is a terminal state: return the state’s utility
+        if env.done() or cur_depth <= 0: #or check time limit and depth?
+            return heuristic_for_minimax(env, me_robot)
+        
+        #if the next agent is MAX: return max-value(state)
+        if me_robot == cur_robot:
+            max_val = float('-inf')
+            operators = env.get_legal_operators(cur_robot)
+            children = [env.clone() for _ in operators]
+            for child, op in zip(children, operators):
+                child.apply_operator(cur_robot, op)
+
+            for _, child in zip(operators, children):
+                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth, limit_time, start_time)
+                if tmp > max_val:
+                    max_val = tmp
+            return max_val
+        else:
+            operators = env.get_legal_operators(cur_robot)
+            children = [env.clone() for _ in operators]
+            for child, op in zip(children, operators):
+                child.apply_operator(cur_robot, op)
+            total = len(operators)
+            probs = [1] * len(operators)
+            for i, (op, child) in enumerate(zip(operators, children)):
+                rob = env.robots[cur_robot]
+                if rob.package == None and len([package for package in env.packages if package.on_board == True and package.position == rob.position]) > 0:
+                    total += 2
+                    probs[i] += 2
+                    
+                elif rob.package and rob.package.destination == rob.position:
+                    total += 2
+                    probs[i] += 2
+                probs = [p / total for p in probs]
+
+                to_return = 0
+                for i, (op, child) in enumerate(zip(operators, children)):
+                    to_return += probs[i] * self.minimax(child,me_robot, 1 - cur_robot, cur_depth - 1, limit_time, start_time)
+                return to_return
+
+                # if op in ["move east", "move west", "move north", "move south"]:
+        
+
+            # return self.max_succ(env, me_robot, cur_robot, cur_depth-1, limit_time, start_time)
+        
+        #if the next agent is MIN: return min-value(state)
+        # return self.min_succ(env, me_robot, cur_robot, cur_depth-1, limit_time, start_time)
+    
+
+    # TODO: section b : 1
     def run_step(self, env: WarehouseEnv, agent_id, time_limit):
-        raise NotImplementedError()
+        start_time = time.time()
+        robot_enemy = 1 - agent_id
+        depth = 0 #trying
+        while depth < MAX_D:
+            try:
+                operators = env.get_legal_operators(agent_id)
+                children = [env.clone() for _ in operators]
+                for child, op in zip(children, operators):
+                    child.apply_operator(agent_id, op)
+                
+                children_heuristics = [self.minimax(child, agent_id, robot_enemy, depth, time_limit, start_time) for child in children]
+                
+                for i, child in enumerate(children_heuristics):
+                    if child == None:
+                        children_heuristics.pop(i)
+                depth = depth + 3
+                max_heuristic = max(children_heuristics)
+                index_selected = children_heuristics.index(max_heuristic)
+                self.op = operators[index_selected]
+                
+            except RuntimeError:
+                return operators[index_selected]
+        return self.op
+
+        
+    
+    
 
 
 # here you can check specific paths to get to know the environment
