@@ -57,8 +57,8 @@ def run_agents():
                 start = time.time()
                 op = agent.run_step(env, i, args.time_limit)
                 end = time.time()
-                # if end - start > args.time_limit:
-                #     raise RuntimeError("Agent used too much time!")
+                if end - start > args.time_limit:
+                    raise RuntimeError("Agent used too much time!")
                 env.apply_operator(i, op)
                 if args.console_print:
                     print('robot ' + str(i) + ' chose ' + op)
@@ -77,7 +77,7 @@ def run_agents():
         robot0_wins = 0
         robot1_wins = 0
         draws = 0
-        num_of_games = 100
+        num_of_games = 40
 
         for i in range(num_of_games):
             env.generate(args.seed + i, 2*args.count_steps)

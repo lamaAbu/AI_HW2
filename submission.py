@@ -32,7 +32,11 @@ def smart_heuristic(env: WarehouseEnv, robot_id: int):
         if packages_on_board.__len__() == 2:
             if(manhattan_distance(cur_robot.position, best_package.position) > manhattan_distance(cur_robot.position,packages_on_board[1].position)):
                 best_package = packages_on_board[1]
- 
+
+        dist_to_package = manhattan_distance(cur_robot.position,best_package.position)
+        dist_to_destination = manhattan_distance(best_package.destination,best_package.position)
+        if (dist_to_package + dist_to_destination) > min(env.num_steps, cur_robot.battery):
+           # if env.num_steps >= 
         return (10000*(credit + 100) + 1/(100*(1 + manhattan_distance(best_package.position,cur_robot.position))))
 
 
@@ -63,7 +67,8 @@ def heuristic_for_minimax(env: WarehouseEnv, agent_id):
 
 def time_out_ERROR(start_t, limit_t):
     cur_t = time.time()
-    if start_t + limit_t  < cur_t:
+    epsilon = 5e-2
+    if start_t + limit_t  < cur_t + epsilon:
         #time limit reached
         raise RuntimeError
 
