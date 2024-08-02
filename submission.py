@@ -8,7 +8,7 @@ from WarehouseEnv import board_size
 import time
 
 
-MAX_D = 10
+MAX_D = 5
 
 
 # TODO: section a : 3
@@ -106,7 +106,7 @@ class AgentMinimax(Agent):
                 child.apply_operator(cur_robot, op)
 
             for _, child in zip(operators, children):
-                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth, limit_time, start_time)
+                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth - 1, limit_time, start_time)
                 if tmp > max_val:
                     max_val = tmp
             return max_val
@@ -118,7 +118,7 @@ class AgentMinimax(Agent):
                 child.apply_operator(cur_robot, op)
 
             for _, child in zip(operators, children):
-                tmp = self.minimax(child, me_robot, 1 - cur_robot, cur_depth, limit_time, start_time)
+                tmp = self.minimax(child, me_robot, 1 - cur_robot, cur_depth - 1, limit_time, start_time)
                 if tmp < min_val:
                     min_val = tmp
             return min_val
@@ -181,7 +181,7 @@ class AgentAlphaBeta(Agent):
                 child.apply_operator(cur_robot, op)
 
             for _, child in zip(operators, children):
-                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth, limit_time, start_time, alpha, beta)
+                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth - 1, limit_time, start_time, alpha, beta)
                 if tmp > max_val:
                     max_val = tmp
                 alpha = max(max_val, alpha)
@@ -197,7 +197,7 @@ class AgentAlphaBeta(Agent):
                 child.apply_operator(cur_robot, op)
 
             for _, child in zip(operators, children):
-                tmp = self.minimax(child, me_robot, 1 - cur_robot, cur_depth, limit_time, start_time, alpha, beta)
+                tmp = self.minimax(child, me_robot, 1 - cur_robot, cur_depth - 1, limit_time, start_time, alpha, beta)
                 if tmp < min_val:
                     min_val = tmp
                 beta = min(min_val, beta)
@@ -264,7 +264,7 @@ class AgentExpectimax(Agent):
                 child.apply_operator(cur_robot, op)
 
             for _, child in zip(operators, children):
-                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth, limit_time, start_time)
+                tmp = self.minimax(child, me_robot,  1 - cur_robot, cur_depth - 1, limit_time, start_time)
                 if tmp > max_val:
                     max_val = tmp
             return max_val
